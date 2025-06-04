@@ -23,6 +23,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 default = []
+ascii = []
 
 ## enables std
 std = [

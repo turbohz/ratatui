@@ -1,3 +1,4 @@
+#[cfg(not(feature="ascii"))]
 use compact_str::CompactString;
 
 use crate::style::{Color, Modifier, Style};
@@ -15,7 +16,12 @@ pub struct Cell {
     /// buffer for short strings.
     ///
     /// See <https://github.com/ratatui/ratatui/pull/601> for more information.
+    #[cfg(not(feature="ascii"))]
     symbol: CompactString,
+
+    /// The cell can only store a byte, to display an ASCII character
+    #[cfg(feature="ascii")]
+    symbol: [u8;1],
 
     /// The foreground color of the cell.
     pub fg: Color,
@@ -45,8 +51,15 @@ impl Cell {
     /// `Self::default().set_symbol()` in that case. See [`CompactString::const_new`] for more
     /// details on this.
     pub const fn new(symbol: &'static str) -> Self {
+
+        #[cfg(feature="ascii")]
+        let symbol = [symbol.as_bytes()[0]];
+
+        #[cfg(not(feature="ascii"))]
+        let symbol = CompactString::const_new(symbol);
+
         Self {
-            symbol: CompactString::const_new(symbol),
+            symbol,
             fg: Color::Reset,
             bg: Color::Reset,
             #[cfg(feature = "underline-color")]
@@ -59,6 +72,9 @@ impl Cell {
     /// Gets the symbol of the cell.
     #[must_use]
     pub fn symbol(&self) -> &str {
+        #[cfg(feature="ascii")]
+        return core::str::from_utf8(self.symbol.as_slice()).unwrap_or(" ");
+        #[cfg(not(feature="ascii"))]
         self.symbol.as_str()
     }
 
@@ -104,7 +120,16 @@ impl Cell {
 
     /// Sets the symbol of the cell.
     pub fn set_symbol(&mut self, symbol: &str) -> &mut Self {
-        self.symbol = CompactString::new(symbol);
+
+        #[cfg(feature="ascii")]
+        let symbol = [symbol.as_bytes()[0]];
+
+        #[cfg(not(feature="ascii"))]
+        // Can't use new_const.
+        // Should be? fn is not const, and &str is not static
+        let symbol = CompactString::new(symbol);
+
+        self.symbol = symbol;
         self
     }
 
@@ -112,14 +137,27 @@ impl Cell {
     ///
     /// This is particularly useful for adding zero-width characters to the cell.
     pub(crate) fn append_symbol(&mut self, symbol: &str) -> &mut Self {
+        #[cfg(not(feature="ascii"))]
         self.symbol.push_str(symbol);
         self
     }
 
     /// Sets the symbol of the cell to a single character.
     pub fn set_char(&mut self, ch: char) -> &mut Self {
-        let mut buf = [0; 4];
-        self.symbol = CompactString::new(ch.encode_utf8(&mut buf));
+
+        #[cfg(feature="ascii")]
+        let symbol = {
+            debug_assert!(ch.is_ascii());
+            [ch as u8]
+        };
+
+        #[cfg(not(feature="ascii"))]
+        let symbol = {
+            let mut buf = [0; 4];
+            CompactString::new(ch.encode_utf8(&mut buf))
+        };
+
+        self.symbol = symbol;
         self
     }
 
@@ -180,7 +218,14 @@ impl Cell {
 
     /// Resets the cell to the empty state.
     pub fn reset(&mut self) {
-        self.symbol = CompactString::const_new(" ");
+
+        #[cfg(feature="ascii")]
+        let symbol = [b' '];
+
+        #[cfg(not(feature="ascii"))]
+        let symbol = CompactString::const_new(" ");
+
+        self.symbol = symbol;
         self.fg = Color::Reset;
         self.bg = Color::Reset;
         #[cfg(feature = "underline-color")]
@@ -207,6 +252,7 @@ impl From<char> for Cell {
 }
 
 #[cfg(test)]
+#[cfg(not(feature="ascii"))]
 mod tests {
     use super::*;
 

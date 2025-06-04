@@ -114,6 +114,8 @@ unstable-backend-writer = [
   "ratatui-termion?/unstable-backend-writer",
 ]
 
+ascii = [ "ratatui-core/ascii" ]
+
 [dependencies]
 document-features = { workspace = true, optional = true }
 instability.workspace = true
