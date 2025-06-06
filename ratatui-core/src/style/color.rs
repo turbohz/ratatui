@@ -124,6 +124,7 @@ pub enum Color {
     /// An 8-bit 256 color.
     ///
     /// See also <https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit>
+    #[cfg(feature="idx-color")]
     Indexed(u8),
 }
 
@@ -322,18 +323,19 @@ impl FromStr for Color {
                 "white" => Self::White,
                 _ => {
 
-                    if let Ok(index) = s.parse::<u8>() {
-                        Self::Indexed(index)
-                    } else {
+                    #[cfg(feature = "idx-color")]
+                    let idx = s.parse::<u8>().map(Color::Indexed).ok();
+                    #[cfg(not(feature="idx-color"))]
+                    let idx = Option::<Color>::None;
 
-                        #[cfg(feature="rgb-color")]
-                        if let Some((r, g, b)) = parse_hex_color(s) {
-                            Self::Rgb(r, g, b)
-                        } else {
-                            return Err(ParseColorError);
-                        };
+                    #[cfg(feature = "rgb-color")]
+                    let rgb = parse_hex_color(s).map(Self::from);
+                    #[cfg(not(feature = "rgb-color"))]
+                    let rgb = Option::<Color>::None;
 
-                        return Err(ParseColorError);
+                    match idx.or(rgb) {
+                        Some(c) => c,
+                        _ => return Err(ParseColorError)
                     }
                 }
             },
@@ -373,6 +375,7 @@ impl fmt::Display for Color {
             Self::White => write!(f, "White"),
             #[cfg(feature="rgb-color")]
             Self::Rgb(r, g, b) => write!(f, "#{r:02X}{g:02X}{b:02X}"),
+            #[cfg(feature = "idx-color")]
             Self::Indexed(i) => write!(f, "{i}"),
         }
     }
@@ -604,6 +607,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "idx-color")]
     fn from_indexed_color() {
         let color: Color = Color::from_str("10").unwrap();
         assert_eq!(color, Color::Indexed(10));
@@ -702,6 +706,7 @@ mod tests {
         assert_eq!(format!("{}", Color::LightMagenta), "LightMagenta");
         assert_eq!(format!("{}", Color::LightCyan), "LightCyan");
         assert_eq!(format!("{}", Color::White), "White");
+        #[cfg(feature = "idx-color")]
         assert_eq!(format!("{}", Color::Indexed(10)), "10");
         #[cfg(feature = "rgb-color")]
         assert_eq!(format!("{}", Color::Rgb(255, 0, 0)), "#FF0000");

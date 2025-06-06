@@ -25,6 +25,7 @@ rustdoc-args = ["--cfg", "docsrs"]
 default = []
 ascii = []
 rgb-color = []
+idx-color = []
 
 ## enables std
 std = [

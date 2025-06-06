@@ -31,11 +31,11 @@ rustdoc-args = ["--cfg", "docsrs"]
 default = ["crossterm", "underline-color", "all-widgets", "macros", "layout-cache", "rgb-color"]
 #! Generally an application will only use one backend, so you should only enable one of the following features:
 ## enables the [`CrosstermBackend`](backend::CrosstermBackend) backend and adds a dependency on [`crossterm`].
-crossterm = ["std", "dep:ratatui-crossterm"]
+crossterm = ["std", "idx-color", "dep:ratatui-crossterm"]
 ## enables the [`TermionBackend`](backend::TermionBackend) backend and adds a dependency on [`termion`].
-termion = ["std", "dep:ratatui-termion"]
+termion = ["std", "idx-color", "dep:ratatui-termion"]
 ## enables the [`TermwizBackend`](backend::TermwizBackend) backend and adds a dependency on [`termwiz`].
-termwiz = ["std", "rgb-color", "dep:ratatui-termwiz"]
+termwiz = ["std", "idx-color", "rgb-color", "dep:ratatui-termwiz"]
 
 ## enables std
 std = ["ratatui-core/std", "ratatui-widgets/std"]
@@ -118,6 +118,10 @@ ascii = [ "ratatui-core/ascii" ]
 
 ## Enables Color::Rbg
 rgb-color = [ "ratatui-core/rgb-color", "ratatui-widgets/rgb-color"]
+
+# Enabled Color::Indexed
+idx-color = [ "ratatui-core/idx-color"]
+
 
 [dependencies]
 document-features = { workspace = true, optional = true }

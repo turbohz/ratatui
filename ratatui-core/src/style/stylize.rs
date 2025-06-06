@@ -39,6 +39,7 @@ pub(crate) enum ColorDebugKind {
 
 impl fmt::Debug for ColorDebug {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+
         #[cfg(feature = "underline-color")]
         let is_underline = self.kind == ColorDebugKind::Underline;
         #[cfg(not(feature = "underline-color"))]
@@ -46,13 +47,18 @@ impl fmt::Debug for ColorDebug {
 
         #[cfg(feature = "rgb-color")]
         let is_rgb = matches!(self.color, Color::Rgb(_, _, _));
-
         #[cfg(not(feature = "rgb-color"))]
         let is_rgb = false;
 
+        #[cfg(feature = "idx-color")]
+        let is_idx = matches!(self.color, Color::Indexed(_));
+        #[cfg(not(feature = "idx-color"))]
+        let is_idx = false;
+
         if is_underline
-            || matches!(self.color, Color::Reset | Color::Indexed(_))
+            || matches!(self.color, Color::Reset)
             || is_rgb
+            || is_idx
         {
             match self.kind {
                 ColorDebugKind::Foreground => write!(f, ".fg(")?,
@@ -615,7 +621,7 @@ mod tests {
     #[case(Color::LightMagenta, ".light_magenta()")]
     #[case(Color::LightCyan, ".light_cyan()")]
     #[case(Color::White, ".white()")]
-    #[case(Color::Indexed(10), ".fg(Color::Indexed(10))")]
+    #[cfg_attr(feature = "idx-color", case(Color::Indexed(10), ".fg(Color::Indexed(10))"))]
     #[cfg_attr(feature="rgb-color", case(Color::Rgb(255, 0, 0), ".fg(Color::Rgb(255, 0, 0))"))]
     fn stylize_debug_foreground(#[case] color: Color, #[case] expected: &str) {
         let debug = color.stylize_debug(ColorDebugKind::Foreground);
@@ -641,7 +647,7 @@ mod tests {
     #[case(Color::LightMagenta, ".on_light_magenta()")]
     #[case(Color::LightCyan, ".on_light_cyan()")]
     #[case(Color::White, ".on_white()")]
-    #[case(Color::Indexed(10), ".bg(Color::Indexed(10))")]
+    #[cfg_attr(feature = "idx-color", case(Color::Indexed(10), ".bg(Color::Indexed(10))"))]
     #[cfg_attr(feature="rgb-color", case(Color::Rgb(255, 0, 0), ".bg(Color::Rgb(255, 0, 0))"))]
     fn stylize_debug_background(#[case] color: Color, #[case] expected: &str) {
         let debug = color.stylize_debug(ColorDebugKind::Background);
@@ -666,7 +672,7 @@ mod tests {
     #[case(Color::LightMagenta, ".underline_color(Color::LightMagenta)")]
     #[case(Color::LightCyan, ".underline_color(Color::LightCyan)")]
     #[case(Color::White, ".underline_color(Color::White)")]
-    #[case(Color::Indexed(10), ".underline_color(Color::Indexed(10))")]
+    #[cfg_attr(feature = "idx-color", case(Color::Indexed(10), ".underline_color(Color::Indexed(10))"))]
     #[cfg_attr(feature="rgb-color", case(Color::Rgb(255, 0, 0), ".underline_color(Color::Rgb(255, 0, 0))"))]
     fn stylize_debug_underline(#[case] color: Color, #[case] expected: &str) {
         let debug = color.stylize_debug(ColorDebugKind::Underline);
