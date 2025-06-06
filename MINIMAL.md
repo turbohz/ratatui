@@ -21,6 +21,14 @@ still allowing functional, useful TUI experiences.
 - [ ] No underline color specifier.
         _This is already optional._
 
+## Scope of changes
+
+From a quick glance, it seems that the fields in `Cell` defining the appearance
+are configured via `Style` objects.
+
+For the content of the `Cell`, we can make adjustments right there, since the field
+is private, accessed via getter/setter methods.
+
 ## Implementation
 
 ### 'ascii' feature
