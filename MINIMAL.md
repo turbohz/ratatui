@@ -41,3 +41,10 @@ We will make the `symbol` field a `[u8]` (a single byte array).
 
 > We choose to wrap it in an array, because it has no cost in terms of space,
 > and some functionality already assumes that `symbol` is a collection.
+### 'rgb-color'
+
+Having the `Rgb(u8,u8,u8) variant in Color increases the space taken by 2 bytes.
+
+Not all terminals support that (Crossterm and Termion do not, according to the doc comments).
+
+Let's gate that functionality behind a `rgb-color` feature.
