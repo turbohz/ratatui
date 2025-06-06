@@ -78,6 +78,7 @@ pub use stylize::{Styled, Stylize};
 #[cfg(feature = "anstyle")]
 mod anstyle;
 mod color;
+#[cfg(feature = "rgb-color")]
 pub mod palette;
 #[cfg(feature = "palette")]
 mod palette_conversion;

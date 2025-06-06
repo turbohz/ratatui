@@ -44,6 +44,7 @@ pub use ratatui_widgets::clear::Clear;
 pub use ratatui_widgets::gauge::{Gauge, LineGauge};
 pub use ratatui_widgets::list::{List, ListDirection, ListItem, ListState};
 pub use ratatui_widgets::logo::{RatatuiLogo, Size as RatatuiLogoSize};
+#[cfg(feature = "rgb-color")]
 pub use ratatui_widgets::mascot::{MascotEyeColor, RatatuiMascot};
 pub use ratatui_widgets::paragraph::{Paragraph, Wrap};
 pub use ratatui_widgets::scrollbar::{

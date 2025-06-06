@@ -119,6 +119,7 @@ pub enum Color {
     /// See <https://github.com/ratatui/ratatui/issues/475> for an example of this problem.
     ///
     /// See also: <https://en.wikipedia.org/wiki/ANSI_escape_code#24-bit>
+    #[cfg(feature="rgb-color")]
     Rgb(u8, u8, u8),
     /// An 8-bit 256 color.
     ///
@@ -126,6 +127,7 @@ pub enum Color {
     Indexed(u8),
 }
 
+#[cfg(feature="rgb-color")]
 impl Color {
     /// Convert a u32 to a Color
     ///
@@ -319,11 +321,18 @@ impl FromStr for Color {
                 "lightcyan" => Self::LightCyan,
                 "white" => Self::White,
                 _ => {
+
                     if let Ok(index) = s.parse::<u8>() {
                         Self::Indexed(index)
-                    } else if let Some((r, g, b)) = parse_hex_color(s) {
-                        Self::Rgb(r, g, b)
                     } else {
+
+                        #[cfg(feature="rgb-color")]
+                        if let Some((r, g, b)) = parse_hex_color(s) {
+                            Self::Rgb(r, g, b)
+                        } else {
+                            return Err(ParseColorError);
+                        };
+
                         return Err(ParseColorError);
                     }
                 }
@@ -362,6 +371,7 @@ impl fmt::Display for Color {
             Self::LightMagenta => write!(f, "LightMagenta"),
             Self::LightCyan => write!(f, "LightCyan"),
             Self::White => write!(f, "White"),
+            #[cfg(feature="rgb-color")]
             Self::Rgb(r, g, b) => write!(f, "#{r:02X}{g:02X}{b:02X}"),
             Self::Indexed(i) => write!(f, "{i}"),
         }
@@ -480,6 +490,7 @@ impl Color {
     }
 }
 
+#[cfg(feature="rgb-color")]
 impl From<[u8; 3]> for Color {
     /// Converts an array of 3 u8 values to a `Color::Rgb` instance.
     fn from([r, g, b]: [u8; 3]) -> Self {
@@ -487,6 +498,7 @@ impl From<[u8; 3]> for Color {
     }
 }
 
+#[cfg(feature="rgb-color")]
 impl From<(u8, u8, u8)> for Color {
     /// Converts a tuple of 3 u8 values to a `Color::Rgb` instance.
     fn from((r, g, b): (u8, u8, u8)) -> Self {
@@ -494,6 +506,7 @@ impl From<(u8, u8, u8)> for Color {
     }
 }
 
+#[cfg(feature="rgb-color")]
 impl From<[u8; 4]> for Color {
     /// Converts an array of 4 u8 values to a `Color::Rgb` instance (ignoring the alpha value).
     fn from([r, g, b, _]: [u8; 4]) -> Self {
@@ -501,6 +514,7 @@ impl From<[u8; 4]> for Color {
     }
 }
 
+#[cfg(feature="rgb-color")]
 impl From<(u8, u8, u8, u8)> for Color {
     /// Converts a tuple of 4 u8 values to a `Color::Rgb` instance (ignoring the alpha value).
     fn from((r, g, b, _): (u8, u8, u8, u8)) -> Self {
@@ -573,6 +587,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature="rgb-color")]
     fn from_u32() {
         assert_eq!(Color::from_u32(0x000000), Color::Rgb(0, 0, 0));
         assert_eq!(Color::from_u32(0xFF0000), Color::Rgb(255, 0, 0));
@@ -582,6 +597,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature="rgb-color")]
     fn from_rgb_color() {
         let color: Color = Color::from_str("#FF0000").unwrap();
         assert_eq!(color, Color::Rgb(255, 0, 0));
@@ -687,6 +703,7 @@ mod tests {
         assert_eq!(format!("{}", Color::LightCyan), "LightCyan");
         assert_eq!(format!("{}", Color::White), "White");
         assert_eq!(format!("{}", Color::Indexed(10)), "10");
+        #[cfg(feature = "rgb-color")]
         assert_eq!(format!("{}", Color::Rgb(255, 0, 0)), "#FF0000");
         assert_eq!(format!("{}", Color::Reset), "Reset");
     }
@@ -772,6 +789,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "rgb-color")]
     fn test_from_array_and_tuple_conversions() {
         let from_array3 = Color::from([123, 45, 67]);
         assert_eq!(from_array3, Color::Rgb(123, 45, 67));

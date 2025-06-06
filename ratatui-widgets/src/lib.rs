@@ -98,6 +98,7 @@ pub mod clear;
 pub mod gauge;
 pub mod list;
 pub mod logo;
+#[cfg(feature = "rgb-color")]
 pub mod mascot;
 pub mod paragraph;
 pub mod scrollbar;
